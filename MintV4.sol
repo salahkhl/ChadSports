@@ -34,7 +34,16 @@ import "./Utils.sol";
 
 /// @title Chad Sports Minting.
 /// @author Memepanze
-/// @notice ERC1155 Minting contract for Chad Sports
+/** @notice ERC1155 Minting contract for Chad Sports.
+* - Minting: The contract allows to mint specific ERC1155 tokenId(s) (1 or 4) or to mint randomly tokenId(s) (1 or 4)
+* - The randomness is powered by Chainlink VRF.
+* There is no maximum supply, however the minting period is 24h.
+* - Discount: There is two type of discounts: normal discount and chad discount.
+* -- Normal Discount: For that feature we will allow holders of collection that we partner with + address that participate to the whitelisting process on social media and website.
+* -- Normal Discount benefits: a discount price to mint Teams during the minting period.
+* -- Chad Discount: Only the 32 hodlers of the unique Chad collection (1:1) can be part of the ChadList
+* -- Chad Discount Benefits: The 32 hodlers can freemint 4 teams of their choice only one time.
+*/
 
 contract ChadSports is ERC1155, ERC1155Supply, IERC2981, ReentrancyGuard, VRFConsumerBaseV2, Ownable {
     using Strings for uint256;

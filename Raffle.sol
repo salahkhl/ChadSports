@@ -24,7 +24,16 @@ import "./Utils.sol";
 
 /// @title Chad Sports Raffle.
 /// @author Memepanze
-/// @notice The goal of the Raffle contract is to store the addresses of the minters and select randomly 12 winners
+/** @notice The goal of the Raffle contract is to store the addresses of the minters and select randomly 12 winners.
+* The Raffle contract is call by the minting contract to index minters
+* The Raffle contract contains two indexes: firstMinters and lastMinters
+* - firstMinters: the first 500 addresses that mint from the Minting Contract
+* - lastMinters: the addresses over the first 500 that mint from the Minting Contract
+* To select winners we leverage on Chainlink VRF
+* We select randomly 6 winners from the firstMinters index and 6 from the lastMinters index
+* The firstMintersWinners will share 80% of the Raffle Pot
+* The lastMintersWinners will share 20% of the Raffle Pot
+*/
 contract Raffle is VRFConsumerBaseV2, Ownable {
     using Strings for uint256;
 
