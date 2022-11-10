@@ -56,9 +56,11 @@ contract ChadSports is ERC1155, ERC1155Supply, IERC2981, ReentrancyGuard, VRFCon
     string public _uriBase;
 
     /// @notice The start date for the minting
+    /// @dev for the 2022 world cup 1668877200
     uint public startDate;
 
     /// @notice The end date for the minting
+    /// @dev for the 2022 world cup 1668952800
     uint public endDate;
 
     /// @notice The address of the Raffle contract 
@@ -171,7 +173,7 @@ contract ChadSports is ERC1155, ERC1155Supply, IERC2981, ReentrancyGuard, VRFCon
     * @param _ids The NFT ids to mint
     */
     modifier payableMint(uint[] memory _ids) {
-        require(block.timestamp >= startDate && block.timestamp <= 1668952800);
+        require(block.timestamp >= startDate && block.timestamp <= endDate);
         if(_ids.length > 1){
             if(discountlist[msg.sender]){
                 require(msg.value >= discountMintBatchPrice/100);
@@ -196,7 +198,7 @@ contract ChadSports is ERC1155, ERC1155Supply, IERC2981, ReentrancyGuard, VRFCon
     * @param _number The number of NFTs to mint
     */
     modifier payableRandomMint(uint _number) {
-        if(block.timestamp >= 1668877200 && block.timestamp <= 1668952800){
+        if(block.timestamp >= startDate && block.timestamp <= endDate){
             if(_number == 1){
                 if(discountlist[msg.sender]){
                     require(msg.value >= discountMintRandomPrice/100);
