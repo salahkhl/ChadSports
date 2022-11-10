@@ -152,11 +152,15 @@ contract ChadSports is ERC1155, ERC1155Supply, IERC2981, ReentrancyGuard, VRFCon
     /// @param randomWords number of random numbers requested
     event RequestFulfilled(uint256 requestId, uint256[] randomWords);
 
+    event BalanceWithdraw(address to, uint amount);
+
     // E R R O R S
 
     error Chad__Unauthorized();
 
     error Chad__NotInTheMitingPeriod();
+
+    error Chad__TransferFailed();
 
     // M O D I F I E R S
     
@@ -326,6 +330,8 @@ contract ChadSports is ERC1155, ERC1155Supply, IERC2981, ReentrancyGuard, VRFCon
         IRaffle(raffle).incrementMinters(msg.sender);
     }
 
+    mapping (uint => address) randomMinters;
+
     /// @notice Function to request random numbers.
     /// @param _numberOfNFTs The number of NFTs to mint.
     /// @dev Call Chainlink VRF to request random numbers and callback fulfillRandomWords.
@@ -349,6 +355,7 @@ contract ChadSports is ERC1155, ERC1155Supply, IERC2981, ReentrancyGuard, VRFCon
         } else {
             emit RequestSent(requestId, numWordsBatch);
         }
+        randomMinters[requestId] = msg.sender;
         return requestId;
     }
 
@@ -406,20 +413,29 @@ contract ChadSports is ERC1155, ERC1155Supply, IERC2981, ReentrancyGuard, VRFCon
             _mint(s_requests[_requestId].sender, myRandNum[0], 1, "");
         }
         // Push the address of the minter in the Raffle Index
-        IRaffle(raffle).incrementMinters(msg.sender);
+        IRaffle(raffle).incrementMinters(randomMinters[_requestId]);
 
         emit RequestFulfilled(_requestId, _randomWords);
 
     }
 
     /// @notice Withdraw the contract balance to the contract owner
-    /// @param _receiver Recipient of the earned balance
-    function withdrawBalance(address _receiver, uint _amount) public payable nonReentrant onlyOwner {
-        payable(_receiver).transfer(_amount * 10*18);
+    /// @param _to Recipient of the withdrawal
+    function withdrawBalance(address _to) external onlyOwner nonReentrant {
+        uint amount = address(this).balance;
+        bool sent;
+
+        (sent, ) = _to.call{value: amount}("");
+        if (!sent) {
+            revert Chad__TransferFailed();
+        }
+
+        emit BalanceWithdraw(_to, amount);
     }
 
     // R O Y A L T I E S
-    /** @dev Royalties implementation. */
+
+    /// @dev Royalties implementation.
 
     /**
      * @dev EIP2981 royalties implementation: set the recepient of the royalties fee to 'newRecepient'
